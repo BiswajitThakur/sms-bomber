@@ -1,50 +1,84 @@
-use crate::{cli::Limit, sms::api_data::Method};
+use core::panic;
+use std::{thread, time::Duration};
+
+use crate::{
+    cli::{App, Limit},
+    sms::api_data::Method,
+};
 
 use super::api_data::ApiData;
 
-use ureq::Request;
-
-pub fn pst() {
-    let body: String = ureq::get("https://github.com/algesten/ureq?tab=readme-ov-file")
-        .set("Example-Header", "header value")
-        .call()
-        .unwrap()
-        .into_string()
-        .unwrap();
-    println!("{}", body);
-}
-
-#[allow(unused)]
 pub struct Attacker {
     data: Vec<ApiData>,
-    limit: Limit,
+    app: App,
 }
 
 impl Attacker {
-    pub fn attack(data: &ApiData, show_output: bool) -> Result<bool, ureq::Error> {
-        match &data.method {
-            Method::POST => {
-                let mut resp = ureq::post(&data.url);
-                for (k, v) in &data.headers {
-                    resp = resp.set(k, v);
-                }
-                let resp = resp.call()?.into_string()?;
-                println!("{}", resp);
+    pub fn init(data: Vec<ApiData>, app: App) -> Self {
+        Self { data, app }
+    }
+}
+
+impl Attacker {
+    pub fn attack(&self) {
+        match self.app.get_limit() {
+            Limit::Infinity => infinity_attack(self),
+            Limit::Value(_) => {
+                panic!("This features is not available on this version.")
             }
-            _ => {}
         }
-        todo!()
     }
 }
-
-impl Attacker {
-    pub fn random_attack(&self) -> Result<bool, ureq::Error> {
-        todo!()
+fn infinity_attack(atkr: &Attacker) {
+    let mut i: usize = 0;
+    let mut success_count: usize = 0;
+    let mut faild_count: usize = 0;
+    if !atkr.app.no_output {
+        println!("<ctrl>+c to close....");
+    };
+    loop {
+        let r = attack(&atkr.data[i], atkr.app.no_output);
+        if r.is_ok() && r.unwrap() {
+            success_count += 1;
+        } else {
+            faild_count += 1;
+        };
+        i = (i + 1) % atkr.data.len();
+        if !atkr.app.no_output {
+            println!("Success: {}\t Faild: {}", success_count, faild_count);
+        };
+        thread::sleep(Duration::from_secs(atkr.app.delay))
     }
-    pub fn index_attack(&self, index: usize) -> Result<(), ureq::Error> {
-        todo!()
+}
+fn attack(data: &ApiData, no_output: bool) -> Result<bool, ureq::Error> {
+    match &data.method {
+        Method::POST => {
+            let mut resp = ureq::post(&data.url);
+            for (k, v) in &data.headers {
+                resp = resp.set(k, v);
+            }
+            let mut query: Vec<(&str, &str)> = Vec::with_capacity(data.query.capacity());
+            for (i, j) in &data.query {
+                query.push((i.as_str(), j.as_str()));
+            }
+            resp = resp.query_pairs(query);
+            if let Some(body) = &data.body {
+                let body_bytes = body.as_bytes();
+                resp = resp.set("Content-Length", body_bytes.len().to_string().as_str());
+                let r = resp.send_bytes(body_bytes)?.into_string()?;
+                if !no_output && r.find(&data.identifier).is_some() {
+                    return Ok(true);
+                };
+            } else {
+                let r = resp.call()?.into_string()?;
+                if !no_output && r.find(&data.identifier).is_some() {
+                    return Ok(true);
+                };
+            }
+        }
+        _ => {
+            panic!("Not implemented yet")
+        }
     }
-    pub fn sequence_attack(&self) -> Result<(), ureq::Error> {
-        todo!()
-    }
+    Ok(false)
 }

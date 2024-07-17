@@ -17,9 +17,13 @@ pub struct App {
     #[arg(short, long)]
     pub limit: Option<u32>,
 
-    /// Show output
+    /// Disable output
     #[arg(short, long)]
-    pub show: bool,
+    pub no_output: bool,
+
+    /// Delay in second
+    #[arg(short, long, default_value_t = 2)]
+    pub delay: u64,
 }
 
 impl App {
