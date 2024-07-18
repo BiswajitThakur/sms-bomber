@@ -64,7 +64,7 @@ impl ApiData {
     pub fn get() -> Vec<Self> {
         vec![Self {
             method: Method::POST,
-            url: "https://www.google.com/api/jio-login-service/login/sendOtp".to_string(),
+            url: "https://www.jio.com/api/jio-login-service/login/sendOtp".to_string(),
             headers: HashMap::from([
                 ("Cookie".to_string(),"JioSessionID=8c7ef27e-5a29-4bb6-af64-f7ea010a2adb; ssjsid=8c7ef27e-5a29-4bb6-af64-f7ea010a2adb; SITESJSESSIONID=ZkW-8pqJmnqLNrmnB-Q1XaNcBG3bzR8NKAocQ1t0tHYNoNpx9u3t!-1783398066!-33467015; ADRUM_BTa=R:35|g:7ce7020b-26c5-4135-8440-b8bf138879b0|n:customer1_a309c9d0-b5ef-4ff1-8978-610c0b29df8f; SameSite=None; NSC_JOwbp5gbcg11ql1emgwtjreciym2vb3=ffffffff0985b18645525d5f4f58455e445a4a4229a0".to_string()),
                 ("Sec-Ch-Ua".to_owned(), "\"Not/A)Brand\";v=\"8\", \"Chromium\";v=\"126\"".to_owned()),

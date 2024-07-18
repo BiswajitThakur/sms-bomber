@@ -1,12 +1,9 @@
-use core::panic;
+use core::{panic, str};
 use std::{thread, time::Duration};
 
-use crate::{
-    cli::{App, Limit},
-    sms::api_data::Method,
-};
-
 use super::api_data::ApiData;
+use crate::cli::{App, Limit};
+use crate::sms::api_data::Method;
 
 pub struct Attacker {
     data: Vec<ApiData>,
@@ -75,6 +72,20 @@ fn attack(data: &ApiData, no_output: bool) -> Result<bool, ureq::Error> {
                     return Ok(true);
                 };
             }
+        }
+        Method::GET => {
+            let mut resp = ureq::get(&data.url);
+            for (k, v) in &data.headers {
+                resp = resp.set(k, v);
+            }
+            let mut query: Vec<(&str, &str)> = Vec::with_capacity(data.query.capacity());
+            for (i, j) in &data.query {
+                query.push((i.as_str(), j.as_str()));
+            }
+            let r = resp.call()?.into_string()?;
+            if !no_output && r.contains(&data.identifier) {
+                return Ok(true);
+            };
         }
         _ => {
             panic!("Not implemented yet")
