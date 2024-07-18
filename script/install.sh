@@ -13,10 +13,10 @@ function install {
     elif [[ -d /data/data/com.termux/files/usr/bin/ ]]; then
       mv ./target/release/sms-bomber /data/data/com.termux/files/usr/bin/ 2>/dev/null
       if [[ $? -ne 0 ]]; then
-          echo "\033[0;31mFaild to install\033[0m"
+          echo -e "\033[0;31mFaild to install\033[0m"
           exit 1
       fi
-      echo  "\033[0;32mInstall success\033[0m"
+      echo  -e "\033[0;32mInstall success\033[0m"
       exit 0
     fi
   else
