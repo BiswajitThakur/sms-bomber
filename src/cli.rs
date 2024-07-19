@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use clap::Parser;
 
 #[derive(Debug, Clone)]
@@ -11,7 +13,7 @@ pub enum Limit {
 pub struct App {
     /// Mobile number
     #[arg(short, long)]
-    pub mobile: u64,
+    pub mobile: Option<u64>,
 
     /// number of sms. Default infinity. (For infinity don't use this flag.)
     #[arg(short, long)]
@@ -24,6 +26,10 @@ pub struct App {
     /// Delay in second
     #[arg(short, long, default_value_t = 2)]
     pub delay: u64,
+
+    /// Uninstall
+    #[arg(long)]
+    pub uninstall: bool,
 }
 
 impl App {
@@ -33,5 +39,9 @@ impl App {
         } else {
             Limit::Infinity
         }
+    }
+    pub fn remove_self(&self) -> Result<(), Box<dyn Error>> {
+        let path = std::env::current_exe()?;
+        Ok(std::fs::remove_file(path)?)
     }
 }
