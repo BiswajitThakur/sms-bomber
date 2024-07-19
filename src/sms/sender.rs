@@ -1,9 +1,8 @@
 use core::{panic, str};
 use std::{thread, time::Duration};
 
-use super::api_data::ApiData;
+use crate::api::{ApiData, Method};
 use crate::cli::{App, Limit};
-use crate::sms::api_data::Method;
 
 pub struct Attacker {
     data: Vec<ApiData>,
