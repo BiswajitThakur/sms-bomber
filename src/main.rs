@@ -1,5 +1,5 @@
 use clap::Parser;
-use sms_bomber::api::{data, ApiData};
+use sms_bomber::api::{country, ApiData};
 use sms_bomber::cli::App;
 use sms_bomber::sms::sender::Attacker;
 
@@ -15,11 +15,11 @@ fn main() {
             std::process::exit(1);
         }
     };
-    if cli.mobile.is_none() {
+    if cli.mobile.is_none() || cli.code.is_none() {
         return;
     };
-    let noice_data = data::get();
-    let filter_data = ApiData::filter_all(noice_data, cli.mobile.unwrap());
+    let noice_data = country::get(cli.code.unwrap());
+    let filter_data = ApiData::filter_all(noice_data, cli.code.unwrap(), cli.mobile.unwrap());
     let attacker = Attacker::init(filter_data, cli);
     let _ = attacker.attack();
 }

@@ -27,6 +27,10 @@ pub struct App {
     #[arg(short, long, default_value_t = 2)]
     pub delay: u64,
 
+    /// Country Code
+    #[arg(short, long)]
+    pub code: Option<u32>,
+
     /// Uninstall
     #[arg(long)]
     pub uninstall: bool,

@@ -41,24 +41,34 @@ pub struct ApiData {
     pub identifier: String,
 }
 impl ApiData {
-    pub fn filter(self, mobile: u64) -> Self {
+    pub fn filter(self, code: u32, mobile: u64) -> Self {
         let mobile = mobile.to_string();
-        let re = regex::Regex::new(r"\{target\}").unwrap();
+        let code = code.to_string();
+        let re_mob = regex::Regex::new(r"\{\{target\}\}").unwrap();
+        let re_code = regex::Regex::new(r"\{\{code\}\}").unwrap();
         let method = &self.method.clone();
-        let url = re.replace_all(&self.url, &mobile).to_string();
+        let url = re_mob.replace_all(&self.url, &mobile).to_string();
+        let url = re_code.replace_all(&url, &code).to_string();
         let mut query = Vec::with_capacity(self.query.capacity());
         for (k, v) in &self.query {
-            query.push((k.to_string(), re.replace_all(v, &mobile).to_string()));
+            let v = re_mob.replace_all(v, &mobile).to_string();
+            let v = re_code.replace_all(&v, &mobile).to_string();
+            query.push((k.to_string(), v));
         }
         let body = if self.body.is_some() {
-            Some(re.replace_all(&self.body.unwrap(), &mobile).to_string())
+            let b = re_mob.replace_all(&self.body.unwrap(), &mobile).to_string();
+            let b = re_code.replace_all(&b, &code).to_string();
+            Some(b)
         } else {
             None
         };
-        let identifier = re.replace_all(&self.identifier, &mobile).to_string();
+        let identifier = re_mob.replace_all(&self.identifier, &mobile).to_string();
+        let identifier = re_code.replace_all(&identifier, &code).to_string();
         let mut headers: HashMap<String, String> = HashMap::with_capacity(self.headers.capacity());
         for (k, v) in self.headers {
-            headers.insert(k, re.replace_all(&v, &mobile).to_string());
+            let v = re_mob.replace_all(&v, &mobile).to_string();
+            let v = re_code.replace_all(&v, &code).to_string();
+            headers.insert(k, v);
         }
         Self {
             method: method.clone(),
@@ -69,10 +79,10 @@ impl ApiData {
             identifier,
         }
     }
-    pub fn filter_all(data: Vec<Self>, mobile: u64) -> Vec<Self> {
+    pub fn filter_all(data: Vec<Self>, code: u32, mobile: u64) -> Vec<Self> {
         let mut n_data: Vec<Self> = Vec::with_capacity(data.capacity());
         for i in data {
-            n_data.push(i.filter(mobile));
+            n_data.push(i.filter(code, mobile));
         }
         n_data
     }
