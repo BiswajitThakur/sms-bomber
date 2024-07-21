@@ -1,5 +1,4 @@
 pub mod country;
-pub mod data;
 use std::collections::HashMap;
 use std::convert::From;
 
